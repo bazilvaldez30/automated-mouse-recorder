@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electron App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <main
+      class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 p-8"
+    >
+      <div
+        class="bg-white shadow-lg rounded-lg p-8 w-full max-w-4xl text-center"
+      >
+        <h1 class="text-4xl font-bold text-gray-800 mb-6">
+          Electron Action Recorder
+        </h1>
+        <p class="text-lg text-gray-600 mb-8">
+          Record your mouse movements and clicks, then replay them with ease.
+        </p>
+        <div class="flex justify-center space-x-4 mb-4">
+          <button
+            class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-blue-300 disabled:cursor-not-allowed"
+            id="start-recording"
+          >
+            Start Recording
+          </button>
+
+          <button
+            class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-blue-300 disabled:cursor-not-allowed"
+            id="pause-resume-recording"
+          >
+            Pause Recording
+          </button>
+
+          <button
+            id="stop-recording"
+            class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition duration-300 ease-in-out disabled:bg-red-300 disabled:cursor-not-allowed"
+            disabled
+          >
+            Stop Recording
+          </button>
+
+          <button
+            id="replay-actions"
+            class="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 ease-in-out disabled:bg-green-300 disabled:cursor-not-allowed"
+            disabled
+          >
+            Replay Actions
+          </button>
+        </div>
+
+        <!-- Countdown and Status Indicator -->
+        <div
+          id="countdown"
+          class="text-2xl font-bold text-gray-700 mb-4 hidden"
+        >
+          Starting in
+          <span id="countdown-timer" class="font-extrabold text-blue-500"
+            >3</span
+          >...
+        </div>
+        <div
+          id="recording-status"
+          class="text-xl font-semibold text-red-600 hidden"
+        >
+          Recording...
+        </div>
+      </div>
+    </main>
+    <script src="renderer.js"></script>
+  </body>
+</html>
