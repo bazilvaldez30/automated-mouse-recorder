@@ -1,0 +1,26 @@
+# Mouse Action Recorder
+
+Mouse Action Recorder is an Electron application that allows you to record and replay mouse movements and clicks. This tool is designed to help you automate repetitive tasks by capturing and replaying your mouse actions.
+
+## Features
+
+- **Record Mouse Movements and Clicks:** Capture your mouse actions with precision.
+- **Pause and Resume Recording:** Easily toggle between pausing and resuming the recording process.
+- **Replay Recorded Actions:** Replay the recorded mouse movements and clicks.
+- **Global Shortcut Support:** Use keyboard shortcuts to trigger actions.
+
+## Installation
+
+Follow these steps to set up and run the Mouse Action Recorder on your local machine.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (version 14 or higher)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/mouse-action-recorder.git
+cd mouse-action-recorder
+```
