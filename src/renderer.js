@@ -1,15 +1,6 @@
 /* import { ipcRenderer } from 'electron' */
 /* import { handleStartRecording, handleTogglePauseResume, handleStopRecording, handleReplay, handleRecordMouseMove, handleRecordMouseClick } from './actions.js'; */
 
-console.log('Renderer script loaded')
-console.log('Electron API:', window)
-
-const { electron } = window
-
-if (!electron) {
-  console.error('Electron is not available in the renderer process')
-}
-
 // Initialize the recording states
 let isRecording = false
 let recordedActions = []
@@ -130,12 +121,6 @@ function handleStopRecording() {
 //Replays the recorded actions by simulating mouse movements and clicks.
 function handleReplay() {
   try {
-    // Check if the robot API is available
-    if (!electron || !electron.robot) {
-      alert('Robot API is not available')
-      return
-    }
-
     // Check if there are any recorded actions to replay
     if (recordedActions.length === 0) {
       alert('No actions recorded to replay.')
@@ -153,12 +138,9 @@ function handleReplay() {
       setTimeout(() => {
         try {
           if (action.type === 'mousemove') {
-            electron.robot.moveMouse(action.x, action.y)
-            console.log(`Replayed mouse move to (${action.x}, ${action.y})`)
+            moveMouse(action.x, action.y)
           } else if (action.type === 'click') {
-            electron.robot.moveMouse(action.x, action.y)
-            electron.robot.mouseClick()
-            console.log(`Replayed mouse click at (${action.x}, ${action.y})`)
+            clickMouse(action.x, action.y)
           }
         } catch (error) {
           console.error('Error during replay action:', error)
@@ -219,3 +201,31 @@ ipcRenderer.on('play-pause-shortcut', () => {
 
   if (isRecording) handleTogglePauseResume()
 }) */
+
+
+  
+// Function to move the mouse to specified coordinates
+async function moveMouse(x, y) {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/move-mouse?x=${x}&y=${y}`
+    )
+
+    await response.text() // Use response.json() if the API returns JSON
+  } catch (error) {
+    console.error('Error:', error)
+  }
+}
+
+// Function to click the mouse
+async function clickMouse(x, y) {
+  try {
+    const response = await fetch(
+      `http://localhost:3000/click-mouse?x=${x}&y=${y}`
+    )
+    await response.text()
+    console.log('Success:', 'Mouse clicked at', x, y)
+  } catch (error) {
+    console.error('Error:', error)
+  }
+}
