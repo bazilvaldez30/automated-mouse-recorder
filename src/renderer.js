@@ -15,6 +15,8 @@ const replayBtn = document.getElementById('replay-actions')
 const countdownEl = document.getElementById('countdown')
 const countdownTimerEl = document.getElementById('countdown-timer')
 const recordingStatusEl = document.getElementById('recording-status')
+const recordingTimeEl = document.getElementById('recording-time')
+const elapsedTimeEl = document.getElementById('elapsed-time')
 
 // Hide the pause button initially
 pauseResumeBtn.hidden = true
@@ -58,11 +60,15 @@ function handleStartCountdown() {
   }, 1000)
 }
 
-//Starts the recording process and initializes the necessary states.
+let elapsedSeconds = 0
+let pauseTime = 0
+
+// Starts the recording process and initializes the necessary states.
 function handleStartRecording() {
   try {
     isRecording = true
     recordedActions = []
+    startTime = Date.now()
 
     // Update the button states
     startBtn.hidden = true
@@ -70,25 +76,48 @@ function handleStartRecording() {
     stopBtn.disabled = false
     replayBtn.disabled = true
 
+    // Show the recording time and start the timer
+    recordingTimeEl.classList.remove('hidden')
+    recordingInterval = setInterval(() => {
+      elapsedSeconds = Math.floor((Date.now() - startTime - pauseTime) / 1000)
+      elapsedTimeEl.textContent = elapsedSeconds
+    }, 1000)
+
     console.log('Recording started...')
   } catch (error) {
     console.error('Error starting recording:', error)
   }
 }
 
-// Toggles between pausing and resuming the recording.
+// Function to pause or resume recording
 function handleTogglePauseResume() {
   try {
-    // Check if the recording is in progress
     if (isRecording) {
       isPaused = !isPaused
-      pauseResumeBtn.textContent = isPaused
-        ? 'Resume Recording'
-        : 'Pause Recording'
 
-      recordingStatusEl.textContent = isPaused ? 'Paused' : 'Recording'
+      if (isPaused) {
+        pauseResumeBtn.textContent = 'Resume Recording'
+        recordingStatusEl.textContent = 'Paused'
+        clearInterval(recordingInterval)
 
-      console.log(`Recording ${isPaused ? 'paused' : 'resumed'}`)
+        // Calculate the time elapsed during the pause
+        pauseTime += Date.now() - startTime
+
+        console.log('Recording paused')
+      } else {
+        pauseResumeBtn.textContent = 'Pause Recording'
+        recordingStatusEl.textContent = 'Recording'
+
+        startTime = Date.now()
+
+        // Resume the recording timer
+        recordingInterval = setInterval(() => {
+          elapsedSeconds = elapsedSeconds + 1
+          elapsedTimeEl.textContent = elapsedSeconds
+        }, 1000)
+
+        console.log('Recording resumed')
+      }
     }
   } catch (error) {
     console.error('Error toggling pause/resume:', error)
@@ -103,7 +132,11 @@ function handleStopRecording() {
     isRecording = false // Reset the recording state
     isPaused = false // Reset the paused state
 
-    recordingStatusEl.classList.add('hidden') // Hide the recording status
+    // Stop the timer and hide the recording time
+    clearInterval(recordingInterval)
+    recordingTimeEl.classList.add('hidden')
+    elapsedTimeEl.textContent = '0'
+    recordingStatusEl.classList.add('hidden')
 
     // Update the button states
     startBtn.hidden = false
@@ -202,8 +235,6 @@ ipcRenderer.on('play-pause-shortcut', () => {
   if (isRecording) handleTogglePauseResume()
 }) */
 
-
-  
 // Function to move the mouse to specified coordinates
 async function moveMouse(x, y) {
   try {
