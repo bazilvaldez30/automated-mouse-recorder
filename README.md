@@ -24,3 +24,25 @@ Follow these steps to set up and run the Mouse Action Recorder on your local mac
 git clone https://github.com/your-username/mouse-action-recorder.git
 cd mouse-action-recorder
 ```
+## Install Dependencies
+
+```bash
+npm install
+```
+
+## Run the Application
+
+```bash
+npm start
+```
+
+## Usage
+  1. Start Recording: Click the "Start Recording" button to begin capturing mouse movements and clicks.
+  2. Pause/Resume Recording: Use the "Pause" button to pause recording and the "Resume" button to continue.
+  3. Stop Recording: Click the "Stop Recording" button to end the recording session.
+  4. Replay Actions: Click the "Replay" button to replay the recorded actions.
+
+## Acknowledgements
+
+- [Electron](https://www.electronjs.org/)
+- [RobotJS](http://robotjs.io/)
