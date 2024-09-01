@@ -10,12 +10,23 @@ ipcRenderer.on('start-recording-shortcut', () => {
 
 ipcRenderer.on('replay-shortcut', () => {
   console.log('Replay shortcut received')
-  if (!isRecording && recordedActions.length > 0) handleReplay()
+
+  if (isRecording && recordedActions.length === 0)
+    return alert('No actions recorded to replay.')
+
+  handleReplay()
 })
 
 ipcRenderer.on('stop-recording-shortcut', () => {
   console.log('Stop recording shortcut received')
   if (isRecording) handleStopRecording()
+})
+
+ipcRenderer.on('pause-resume-replay', () => {
+  console.log('Pause/Resume replay shortcut received')
+  if (isReplaying) {
+    isReplayPaused ? handleResumeReplay() : handlePauseReplay()
+  }
 })
 
 // ================== Initialize DOM Elements ================== //
@@ -28,6 +39,8 @@ const countdownTimerEl = document.getElementById('countdown-timer')
 const recordingStatusEl = document.getElementById('recording-status')
 const recordingTimeEl = document.getElementById('recording-time')
 const elapsedTimeEl = document.getElementById('elapsed-time')
+const resumeReplay = document.getElementById('resumeButton')
+const pauseReplay = document.getElementById('pauseButton')
 
 // ================== Event Listeners ================== //
 
@@ -36,11 +49,12 @@ startBtn.addEventListener('click', handleStartCountdown)
 pauseResumeBtn.addEventListener('click', handleTogglePauseResume)
 stopBtn.addEventListener('click', handleStopRecording)
 replayBtn.addEventListener('click', handleReplay)
+resumeReplay.addEventListener('click', handleResumeReplay)
+pauseReplay.addEventListener('click', handlePauseReplay)
 
 // Add event listeners to record mouse movements and clicks
 document.addEventListener('mousemove', handleRecordMouseMove)
 document.addEventListener('click', handleRecordMouseClick)
-
 
 // ================== Recording States ================== //
 
@@ -51,10 +65,8 @@ let countdownInterval
 let elapsedSeconds = 0
 let pauseTime = 0
 let lastActionIndex = 0
-let isReplaying = false
 
 pauseResumeBtn.hidden = true // Hide the pause button initially
-
 // ================== Functions ================== //
 
 //Starts the countdown before starting the recording process.
@@ -171,7 +183,11 @@ function handleStopRecording() {
   }
 }
 
-//Replays the recorded actions by simulating mouse movements and clicks.
+let lastIndexPause = 0
+let isReplayPaused = false
+let isReplaying = false
+let remainingActions = []
+
 function handleReplay() {
   try {
     // Check if there are any recorded actions to replay
@@ -180,22 +196,32 @@ function handleReplay() {
       return
     }
 
-    if (isReplaying) return // Prevent multiple replays
+    if (isReplaying && !isReplayPaused) return // Prevent multiple replays
 
     isReplaying = true
+    isReplayPaused = false
 
     // Update the recording status in UI
     recordingStatusEl.classList.remove('hidden')
     recordingStatusEl.textContent = 'Mouse recorded action playing...'
+    replayBtn.classList.add('hidden')
+    pauseReplay.classList.remove('hidden')
 
-    let startTime = recordedActions[0].time
-    let lastActionTime = startTime
+    let actionsToReplay =
+      remainingActions.length > 0 ? remainingActions : recordedActions
+    let startTime = actionsToReplay[lastIndexPause].time
 
-    recordedActions.forEach((action, index) => {
-      let delay = action.time - startTime
+    const replayInterval = setInterval(() => {
+      if (isReplayPaused) {
+        clearInterval(replayInterval)
+        return
+      }
 
-      // Delay for each action to be executed
-      setTimeout(() => {
+      let action = actionsToReplay[lastIndexPause]
+      let currentTime = new Date().getTime()
+      let actionTime = startTime + (action.time - actionsToReplay[0].time)
+
+      if (currentTime >= actionTime) {
         try {
           if (action.type === 'mousemove') {
             helpers.moveMouse(action.x, action.y)
@@ -206,29 +232,54 @@ function handleReplay() {
           console.error('Error during replay action:', error)
         }
 
-        // Update lastActionTime after each action
-        lastActionTime = action.time
+        lastIndexPause++
 
         // If it's the last action, update the status
-        if (index === recordedActions.length - 1) {
-          // Calculate the delay for the final status update
-          let finalDelay = lastActionTime - startTime
-          setTimeout(() => {
-            recordingStatusEl.textContent = 'Replay completed'
-            isReplaying = false
-            console.log('Replay completed')
+        if (lastIndexPause >= actionsToReplay.length) {
+          clearInterval(replayInterval)
+          recordingStatusEl.textContent = 'Replay completed'
+          isReplaying = false
+          remainingActions = []
+          lastIndexPause = 0 // Reset the pause index for next replay
+          replayBtn.classList.remove('hidden')
+          pauseReplay.classList.add('hidden')
+          resumeReplay.classList.add('hidden')
 
-            setTimeout(() => {
-              recordingStatusEl.textContent = ''
-              recordingStatusEl.classList.add('hidden')
-            }, 5000)
-          }, finalDelay)
+          console.log('Replay completed')
+
+          setTimeout(() => {
+            recordingStatusEl.textContent = ''
+            recordingStatusEl.classList.add('hidden')
+          }, 5000)
         }
-      }, delay)
-    })
+      }
+    }, 10) // Check every 10ms to stay responsive
   } catch (error) {
     console.error('Error handling replay:', error)
   }
+}
+
+function handlePauseReplay() {
+  if (!isReplaying || isReplayPaused) return
+
+  isReplayPaused = true
+  remainingActions = recordedActions.slice(lastIndexPause)
+  console.log('Replay paused at index:', lastIndexPause)
+  recordingStatusEl.textContent = 'Replay paused'
+
+  resumeReplay.classList.remove('hidden')
+  pauseReplay.classList.add('hidden')
+}
+
+function handleResumeReplay() {
+  if (!isReplayPaused) return
+
+
+  resumeReplay.classList.add('hidden')
+  pauseReplay.classList.remove('hidden')
+
+  console.log('Resuming replay from index:', lastIndexPause)
+  handleReplay()
 }
 
 // Records mouse movement actions.

@@ -26,6 +26,7 @@ function createWindow() {
     { key: 'Ctrl+R', action: 'replay-shortcut' },
     { key: 'Ctrl+S', action: 'stop-recording-shortcut' },
     { key: 'Ctrl+P', action: 'start-recording-shortcut' },
+    { key: 'Ctrl+Q', action: 'pause-resume-replay' },
   ]
 
   shortcuts.forEach(({ key, action }) => {

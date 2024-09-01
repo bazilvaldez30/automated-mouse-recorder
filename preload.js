@@ -14,14 +14,24 @@ contextBridge.exposeInMainWorld('electron', {
 
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on: (channel, listener) => {
-    const validChannels = ['replay-shortcut', 'start-recording-shortcut', 'stop-recording-shortcut']
+    const validChannels = [
+      'replay-shortcut',
+      'start-recording-shortcut',
+      'stop-recording-shortcut',
+      'pause-resume-replay',
+    ]
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
       ipcRenderer.on(channel, (event, ...args) => listener(...args))
     }
   },
   send: (channel, data) => {
-    const validChannels = ['replay-shortcut', 'start-recording-shortcut', 'stop-recording-shortcut']
+    const validChannels = [
+      'replay-shortcut',
+      'start-recording-shortcut',
+      'stop-recording-shortcut',
+      'pause-resume-replay',
+    ]
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data)
     }
