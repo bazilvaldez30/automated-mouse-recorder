@@ -46,7 +46,7 @@ npm start
 |----------|----------------------|
 | Ctrl+R   | Replay recorded actions |
 | Ctrl+S   | Stop recording        |
-| Ctrl+P   | Start recording       |
+| Ctrl+P   | Start/Pause/Resume recording       |
 | Ctrl+Q   | Pause/Resume replay   |
 
 
