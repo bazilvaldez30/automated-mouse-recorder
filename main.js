@@ -1,43 +1,48 @@
-import { app, BrowserWindow, globalShortcut } from 'electron'
-import path from 'path'
-import url from 'url'
-
-// Resolve __dirname for ES modules
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
+const { app, BrowserWindow, globalShortcut } = require('electron')
+const path = require('path')
+const url = require('url')
 
 let win
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 800,
+    width: 950,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'), // Ensure this path is correct
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
       contextIsolation: true,
-      nodeIntegration: false,
-      enableRemoteModule: false,
     },
   })
 
-  win.loadFile(path.join(__dirname, 'src', 'index.html'))
+  win.webContents.openDevTools()
 
-  // Register the global shortcut for Ctrl+Shift+/
-  globalShortcut.register('Ctrl+R', () => {
-    if (win) {
-      win.webContents.send('replay-shortcut')
-    }
-  })
+  win.loadFile(path.join(__dirname, 'renderer', 'index.html'))
 
-  // Register the global shortcut for Ctrl+Shift+/
-  globalShortcut.register('Ctrl+P', () => {
-    if (win) {
-      win.webContents.send('play-pause-shortcut')
-    }
+  /*  ================== Register the global shortcut ==================  */
+
+  // Register global shortcuts
+  const shortcuts = [
+    { key: 'Ctrl+R', action: 'replay-shortcut' },
+    { key: 'Ctrl+S', action: 'stop-recording-shortcut' },
+    { key: 'Ctrl+P', action: 'start-recording-shortcut' },
+  ]
+
+  shortcuts.forEach(({ key, action }) => {
+    globalShortcut.register(key, () => {
+      console.log(`${key} shortcut triggered`)
+
+      if (win) {
+        win.webContents.send(action)
+      }
+    })
   })
 }
 
 app.whenReady().then(() => {
   createWindow()
+
+  win.on('closed', () => (win = null))
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

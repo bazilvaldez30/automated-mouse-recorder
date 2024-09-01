@@ -8,15 +8,22 @@ let isPaused = false
 // Starts the recording process and initializes the necessary states.
 export const handleStartRecording = () => {
   try {
-    console.log('Start Recording clicked')
     isRecording = true
     recordedActions = []
+    startTime = Date.now()
 
     // Update the button states
     startBtn.hidden = true
     pauseResumeBtn.hidden = false
     stopBtn.disabled = false
     replayBtn.disabled = true
+
+    // Show the recording time and start the timer
+    recordingTimeEl.classList.remove('hidden')
+    recordingInterval = setInterval(() => {
+      elapsedSeconds = Math.floor((Date.now() - startTime - pauseTime) / 1000)
+      elapsedTimeEl.textContent = elapsedSeconds
+    }, 1000)
 
     console.log('Recording started...')
   } catch (error) {

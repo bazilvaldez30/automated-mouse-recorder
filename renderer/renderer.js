@@ -1,13 +1,24 @@
-/* import { ipcRenderer } from 'electron' */
-/* import { handleStartRecording, handleTogglePauseResume, handleStopRecording, handleReplay, handleRecordMouseMove, handleRecordMouseClick } from './actions.js'; */
+/* import { handleStartRecording, handleTogglePauseResume, handleStopRecording, handleReplay, handleRecordMouseMove, handleRecordMouseClick } from './utils.js'; */
 
-// Initialize the recording states
-let isRecording = false
-let recordedActions = []
-let isPaused = false
-let countdownInterval
+/* ================== Listen for the global shortcut events ================== */
 
-// DOM elements
+ipcRenderer.on('start-recording-shortcut', () => {
+  console.log('Start recording shortcut received')
+  if (!isRecording) return handleStartCountdown()
+  handleTogglePauseResume()
+})
+
+ipcRenderer.on('replay-shortcut', () => {
+  console.log('Replay shortcut received')
+  if (!isRecording && recordedActions.length > 0) handleReplay()
+})
+
+ipcRenderer.on('stop-recording-shortcut', () => {
+  console.log('Stop recording shortcut received')
+  if (isRecording) handleStopRecording()
+})
+
+// ================== Initialize DOM Elements ================== //
 const startBtn = document.getElementById('start-recording')
 const pauseResumeBtn = document.getElementById('pause-resume-recording')
 const stopBtn = document.getElementById('stop-recording')
@@ -18,8 +29,7 @@ const recordingStatusEl = document.getElementById('recording-status')
 const recordingTimeEl = document.getElementById('recording-time')
 const elapsedTimeEl = document.getElementById('elapsed-time')
 
-// Hide the pause button initially
-pauseResumeBtn.hidden = true
+// ================== Event Listeners ================== //
 
 // Adding event listeners to the buttons
 startBtn.addEventListener('click', handleStartCountdown)
@@ -31,8 +41,21 @@ replayBtn.addEventListener('click', handleReplay)
 document.addEventListener('mousemove', handleRecordMouseMove)
 document.addEventListener('click', handleRecordMouseClick)
 
-// Was trying to move the functions to a separate file but it didn't work so i just left them here but it supposed to be in a separate file
-/* utils.js */
+
+// ================== Recording States ================== //
+
+let isRecording = false
+let recordedActions = []
+let isPaused = false
+let countdownInterval
+let elapsedSeconds = 0
+let pauseTime = 0
+let lastActionIndex = 0
+let isReplaying = false
+
+pauseResumeBtn.hidden = true // Hide the pause button initially
+
+// ================== Functions ================== //
 
 //Starts the countdown before starting the recording process.
 function handleStartCountdown() {
@@ -60,14 +83,12 @@ function handleStartCountdown() {
   }, 1000)
 }
 
-let elapsedSeconds = 0
-let pauseTime = 0
-
 // Starts the recording process and initializes the necessary states.
 function handleStartRecording() {
   try {
     isRecording = true
     recordedActions = []
+    isPaused = false
     startTime = Date.now()
 
     // Update the button states
@@ -75,6 +96,8 @@ function handleStartRecording() {
     pauseResumeBtn.hidden = false
     stopBtn.disabled = false
     replayBtn.disabled = true
+    recordingStatusEl.classList.remove('hidden')
+    recordingStatusEl.textContent = 'Mouse recorded action playing...'
 
     // Show the recording time and start the timer
     recordingTimeEl.classList.remove('hidden')
@@ -99,9 +122,6 @@ function handleTogglePauseResume() {
         pauseResumeBtn.textContent = 'Resume Recording'
         recordingStatusEl.textContent = 'Paused'
         clearInterval(recordingInterval)
-
-        // Calculate the time elapsed during the pause
-        pauseTime += Date.now() - startTime
 
         console.log('Recording paused')
       } else {
@@ -160,23 +180,49 @@ function handleReplay() {
       return
     }
 
-    // Disable the replay button during replay
-    let startTime = recordedActions[0].time
+    if (isReplaying) return // Prevent multiple replays
 
-    // map over the recorded actions and use setTimeout to replay the actions
-    recordedActions.forEach((action) => {
+    isReplaying = true
+
+    // Update the recording status in UI
+    recordingStatusEl.classList.remove('hidden')
+    recordingStatusEl.textContent = 'Mouse recorded action playing...'
+
+    let startTime = recordedActions[0].time
+    let lastActionTime = startTime
+
+    recordedActions.forEach((action, index) => {
       let delay = action.time - startTime
 
-      // Use setTimeout to maintain the time difference between actions
+      // Delay for each action to be executed
       setTimeout(() => {
         try {
           if (action.type === 'mousemove') {
-            moveMouse(action.x, action.y)
+            helpers.moveMouse(action.x, action.y)
           } else if (action.type === 'click') {
-            clickMouse(action.x, action.y)
+            helpers.clickMouse(action.x, action.y)
           }
         } catch (error) {
           console.error('Error during replay action:', error)
+        }
+
+        // Update lastActionTime after each action
+        lastActionTime = action.time
+
+        // If it's the last action, update the status
+        if (index === recordedActions.length - 1) {
+          // Calculate the delay for the final status update
+          let finalDelay = lastActionTime - startTime
+          setTimeout(() => {
+            recordingStatusEl.textContent = 'Replay completed'
+            isReplaying = false
+            console.log('Replay completed')
+
+            setTimeout(() => {
+              recordingStatusEl.textContent = ''
+              recordingStatusEl.classList.add('hidden')
+            }, 5000)
+          }, finalDelay)
         }
       }, delay)
     })
@@ -216,47 +262,5 @@ function handleRecordMouseClick(e) {
     }
   } catch (error) {
     console.error('Error recording mouse click:', error)
-  }
-}
-
-/* Codes for the global shortcuts but it didn't work becaue of the preload.js file */
-
-// Listen for the global shortcut event
-/* ipcRenderer.on('replay-shortcut', () => {
-  console.log('Global shortcut pressed')
-
-  if (!isRecording && recordedActions.length > 0) handleReplay()
-})
-
-// Listen for the global shortcut event
-ipcRenderer.on('play-pause-shortcut', () => {
-  console.log('Global shortcut pressed')
-
-  if (isRecording) handleTogglePauseResume()
-}) */
-
-// Function to move the mouse to specified coordinates
-async function moveMouse(x, y) {
-  try {
-    const response = await fetch(
-      `http://localhost:3000/move-mouse?x=${x}&y=${y}`
-    )
-
-    await response.text() // Use response.json() if the API returns JSON
-  } catch (error) {
-    console.error('Error:', error)
-  }
-}
-
-// Function to click the mouse
-async function clickMouse(x, y) {
-  try {
-    const response = await fetch(
-      `http://localhost:3000/click-mouse?x=${x}&y=${y}`
-    )
-    await response.text()
-    console.log('Success:', 'Mouse clicked at', x, y)
-  } catch (error) {
-    console.error('Error:', error)
   }
 }
