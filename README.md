@@ -42,6 +42,14 @@ npm start
   3. Stop Recording: Click the "Stop Recording" button to end the recording session.
   4. Replay Actions: Click the "Replay" button to replay the recorded actions.
 
+| Shortcut | Action               |
+|----------|----------------------|
+| Ctrl+R   | Replay recorded actions |
+| Ctrl+S   | Stop recording        |
+| Ctrl+P   | Start recording       |
+| Ctrl+Q   | Pause/Resume replay   |
+
+
 ## Acknowledgements
 
 - [Electron](https://www.electronjs.org/)
