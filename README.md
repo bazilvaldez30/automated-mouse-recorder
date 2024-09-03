@@ -24,8 +24,8 @@ Follow these steps to set up and run the Mouse Action Recorder on your local mac
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/mouse-action-recorder.git
-cd mouse-action-recorder
+git clone https://github.com/your-username/automated-action-recorder.git
+cd automated-action-recorder
 ```
 ## Install Dependencies
 
