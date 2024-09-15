@@ -2,6 +2,9 @@
 
 Mouse Action Recorder is an Electron application that allows you to record and replay mouse movements and clicks. This tool is designed to help you automate repetitive tasks by capturing and replaying your mouse actions.
 
+## Video walk through
+https://github.com/user-attachments/assets/47413e45-02f8-4429-aae1-889081f6e623
+
 ## Features
 
 - **Record Mouse Movements and Clicks:** Capture your mouse actions with precision.
@@ -21,8 +24,8 @@ Follow these steps to set up and run the Mouse Action Recorder on your local mac
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/mouse-action-recorder.git
-cd mouse-action-recorder
+git clone https://github.com/your-username/automated-action-recorder.git
+cd automated-action-recorder
 ```
 ## Install Dependencies
 
@@ -41,6 +44,14 @@ npm start
   2. Pause/Resume Recording: Use the "Pause" button to pause recording and the "Resume" button to continue.
   3. Stop Recording: Click the "Stop Recording" button to end the recording session.
   4. Replay Actions: Click the "Replay" button to replay the recorded actions.
+
+| Shortcut | Action               |
+|----------|----------------------|
+| Ctrl+R   | Replay recorded actions |
+| Ctrl+S   | Stop recording        |
+| Ctrl+P   | Start/Pause/Resume recording       |
+| Ctrl+Q   | Pause/Resume replay   |
+
 
 ## Acknowledgements
 
