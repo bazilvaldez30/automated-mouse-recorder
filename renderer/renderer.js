@@ -58,13 +58,20 @@ document.addEventListener('click', handleRecordMouseClick)
 
 // ================== Recording States ================== //
 
-let isRecording = false
-let recordedActions = []
-let isPaused = false
+// Recording states
 let countdownInterval
+let isRecording = false
+let isPaused = false
 let elapsedSeconds = 0
 let pauseTime = 0
+let recordedActions = []
+
+// Replay states
+let isReplayPaused = false
+let isReplaying = false
+let lastIndexPause = 0
 let lastActionIndex = 0
+let remainingActions = []
 
 pauseResumeBtn.hidden = true // Hide the pause button initially
 // ================== Functions ================== //
@@ -183,11 +190,6 @@ function handleStopRecording() {
   }
 }
 
-let lastIndexPause = 0
-let isReplayPaused = false
-let isReplaying = false
-let remainingActions = []
-
 function handleReplay() {
   try {
     // Check if there are any recorded actions to replay
@@ -273,7 +275,6 @@ function handlePauseReplay() {
 
 function handleResumeReplay() {
   if (!isReplayPaused) return
-
 
   resumeReplay.classList.add('hidden')
   pauseReplay.classList.remove('hidden')
